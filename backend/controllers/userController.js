@@ -2,6 +2,9 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const Token = require("../models/tokenModel");
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
 
 // Generate Token
 const generateToken = (id) => {
@@ -202,27 +205,120 @@ const changePassword = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (!user) {
-    res.status(400)
-    throw new Error('User not found please signup')
+    res.status(400);
+    throw new Error("User not found please signup");
   }
 
   const { oldPassword, password } = req.body;
-if (!oldPassword || !password){
-  res.status(400)
-  throw new Error('pleased add a old and new passwords')
-}
+  if (!oldPassword || !password) {
+    res.status(400);
+    throw new Error("pleased add a old and new passwords");
+  }
 
-const passwordIscorrect = await bcrypt.compare(oldPassword, user.password)
+  const passwordIscorrect = await bcrypt.compare(oldPassword, user.password);
 
-   if (user && passwordIscorrect){
-        user.password = password
-        await user.save()
-        res.status(200).send("pasword succesfully changee")
-   }else{
-        res.status(400)
-        throw new Error("old password incorrect")
-   }
+  if (user && passwordIscorrect) {
+    user.password = password;
+    await user.save();
+    res.status(200).send("pasword succesfully changee");
+  } else {
+    res.status(400);
+    throw new Error("old password incorrect");
+  }
+});
 
+//FORGOT PASSWORD
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(404);
+    throw new Error("user not found");
+  }
+
+  // Delete token if it exists in the database
+  let token = await Token.findOne({ userId: user._id });
+  if (token) {
+    await token.deleteOne();
+  }
+
+  // create Reset token
+  let resetToken = crypto.randomBytes(32).toString("hex") + user._id;
+
+  //Hash token before saving to database
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  //save token to database
+
+  await new Token({
+    userId: user._id,
+    token: hashedToken,
+    createAt: Date.now(),
+    expiresAt: Date.now() + 30 * (60 * 1000), // Thirty minutes
+  }).save();
+
+  //construct Reset URL
+  const resetUrl = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
+
+  //Reset  Email
+  const message = `
+    <h2>Hello ${user.name}</h2>
+    <p>Kindly use the url below to reset your password</p>
+    <p>The reset link is valid for 30 minutes.</p>
+
+    
+    <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
+
+
+    <p>Regards...</p>
+    <p>Henry Company</p>
+    
+    `;
+  const subject = "Password Reset Request";
+  const send_to = user.email;
+  const sent_from = process.env.EMAIL_USER;
+
+  try {
+    await sendEmail(subject, message, send_to, sent_from);
+    res.status(200).json({ success: true, message: "Reset Email Sent" });
+  } catch (error) {
+    res.status(500);
+    throw new Error("Email not sent, please try again");
+  }
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { password } = req.body;
+  const { resetToken } = req.params;
+
+  //hashed token  before we send to database
+  const hashedToken = crypto
+    .createHash("SHA256")
+    .update(resetToken)
+    .digest("hex");
+
+  //find token in databse
+
+  const userToken = await Token.findOne({
+    token: hashedToken,
+    expiresAt: { $gt: Date.now() },
+  });
+
+  if (!userToken) {
+    res.status(404);
+    throw new Error("Invalid or Expired Token");
+  }
+
+  //find user
+  const user = await User.findOne({ _id: userToken.userId });
+  user.password = password;
+  await user.save();
+
+  res.status(200).json({ message: "Password Reset Successfully Please Login" });
 });
 
 module.exports = {
@@ -233,4 +329,6 @@ module.exports = {
   loginStatus,
   updateUser,
   changePassword,
+  forgotPassword,
+  resetPassword,
 };
