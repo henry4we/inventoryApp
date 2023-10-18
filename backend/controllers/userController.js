@@ -10,7 +10,7 @@ const sendEmail = require("../utils/sendEmail");
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 };
-
+//registerUser
 const registerUser = asyncHandler(async (req, res) => {
   //destructure the name , email and password
   const { name, email, password } = req.body;
@@ -69,7 +69,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("Invalid user data");
   }
 });
-
+//loginUser
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -123,7 +123,7 @@ const loginUser = asyncHandler(async (req, res) => {
     );
   }
 });
-
+//logoutUser
 const logoutUser = asyncHandler(async (req, res) => {
   res.cookie("token", "", {
     path: "/",
@@ -220,7 +220,7 @@ const changePassword = asyncHandler(async (req, res) => {
   if (user && passwordIscorrect) {
     user.password = password;
     await user.save();
-    res.status(200).send("pasword succesfully changee");
+    res.status(200).send("password succesfully change");
   } else {
     res.status(400);
     throw new Error("old password incorrect");
@@ -269,13 +269,15 @@ const forgotPassword = asyncHandler(async (req, res) => {
     <h2>Hello ${user.name}</h2>
     <p>Kindly use the url below to reset your password</p>
     <p>The reset link is valid for 30 minutes.</p>
+    <h1>The is a Test Mail</h1>
+    
 
     
     <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
 
 
     <p>Regards...</p>
-    <p>Henry Company</p>
+    <p>Henry Stiles Company</p>
     
     `;
   const subject = "Password Reset Request";
@@ -291,6 +293,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   }
 });
 
+//resetPassword
 const resetPassword = asyncHandler(async (req, res) => {
   const { password } = req.body;
   const { resetToken } = req.params;

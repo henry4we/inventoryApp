@@ -3,6 +3,7 @@ const Product = require("../models/productModel");
 const { fileSizeFormatter } = require("../utils/fileUpload");
 const cloudinary = require("cloudinary").v2;
 
+
 const createProduct = asyncHandler(async (req, res) => {
   //destructure product
   const { name, sku, category, quantity, price, description } = req.body;
@@ -12,6 +13,7 @@ const createProduct = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Please fil in all the required fields");
   }
+
 
   //handle image upload
   let fileData = {};
