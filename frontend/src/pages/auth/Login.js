@@ -16,14 +16,6 @@ const initialState = {
 };
 
 const Login = () => {
-  // const [theme, setTheme] = useLocalStorage("theme" ? "dark" : "light");
-
-  // const switchTheme = () => {
-  //   const newTheme = theme === "light" ? "dark" : "light";
-
-  //   setTheme(newTheme)
-  // };
-  
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

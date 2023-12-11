@@ -18,7 +18,7 @@ const createProduct = asyncHandler(async (req, res) => {
   //handle image upload
   let fileData = {};
   if (req.file) {
-    let uploadedFile;
+    let uploadedFile; 
     try {
       uploadedFile = await cloudinary.uploader.upload(req.file.path, {
         folder: "Inventory App",
@@ -121,15 +121,15 @@ const updateProduct = asyncHandler(async (req, res) => {
   let fileData = {};
   if (req.file) {
     //save to cloudanary
-    let uploadFile;
+    let uploadedFile;
     try {
-      uploadFile = await cloudinary.uploader.upload(req.file.path, {
+      uploadedFile = await cloudinary.uploader.upload(req.file.path, {
         folder: "Inventory App",
         resource_type: "image",
       });
     } catch (error) {
       res.status(500);
-      throw new Error("Image couldn't br upload");
+      throw new Error("Image couldn't be upload");
     };
   
     // fileData = {

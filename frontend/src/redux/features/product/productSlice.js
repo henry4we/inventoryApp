@@ -14,7 +14,6 @@
 // Extracting error message from the error response or using a default message
 // Reject the thunk's promise and return the error message to be stored in the state
 
-
 // This reducer calculates the total value of all products in the store.
 // It is triggered by the `CALC_STORE_VALUE` action.
 // Getting products from action payload.
@@ -23,9 +22,6 @@
 // pushing the result to our array.
 // Calculating the totalValue of the products in the store using the reduce function.
 // Storing the calculated total value in the state.(totalStoreValue)
-
-
-
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import productService from "./productService";

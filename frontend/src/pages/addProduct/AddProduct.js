@@ -1,9 +1,13 @@
 import React, { useState } from "react";
-import ProductForm from "../../components/product/productForm/ProductForm";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { createProduct, selectIsLoading } from "../../redux/features/product/productSlice";
-import Loader from "../../components/loader/Loader"
+import Loader from "../../components/loader/Loader";
+import ProductForm from "../../components/product/productForm/ProductForm";
+import {
+  createProduct,
+  selectIsLoading,
+} from "../../redux/features/product/productSlice";
+
 const initialState = {
   name: "",
   category: "",
@@ -12,9 +16,8 @@ const initialState = {
 };
 
 const AddProduct = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
   const [product, setProduct] = useState(initialState);
   const [productImage, setProductImage] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
@@ -22,7 +25,7 @@ const AddProduct = () => {
 
   const isLoading = useSelector(selectIsLoading);
 
-  const { name, category,price, quantity } = product;
+  const { name, category, price, quantity } = product;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -36,7 +39,7 @@ const AddProduct = () => {
 
   const generateKSKU = (category) => {
     const letter = category.slice(0, 3).toUpperCase();
-    const number = Date.now;
+    const number = Date.now();
     const sku = letter + "-" + number;
     return sku;
   };
@@ -47,33 +50,31 @@ const AddProduct = () => {
     formData.append("name", name);
     formData.append("sku", generateKSKU(category));
     formData.append("category", category);
-    formData.append("quantity",Number (quantity));
+    formData.append("quantity", Number(quantity));
     formData.append("price", price);
     formData.append("description", description);
     formData.append("image", productImage);
 
-      // console.log(...formData);
+    //console.log(...formData);
+
     await dispatch(createProduct(formData));
 
     navigate("/dashboard");
   };
 
-  
   return (
-    <div className="--mt">
-      {isLoading && <Loader/>}
+    <div>
+      {isLoading && <Loader />}
       <h3 className="--mt">Add New Product</h3>
-
       <ProductForm
-       product={product}
-       productImage={productImage}
-       imagePreview={imagePreview}
-       description={description}
-       setDescription={setDescription}
-       handleInputChange={handleInputChange}
-       handleImageChange={handleImageChange}
-       saveProduct={saveProduct}
-      
+        product={product}
+        productImage={productImage}
+        imagePreview={imagePreview}
+        description={description}
+        setDescription={setDescription}
+        handleInputChange={handleInputChange}
+        handleImageChange={handleImageChange}
+        saveProduct={saveProduct}
       />
     </div>
   );
